@@ -1,11 +1,15 @@
 // IRS.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
+#include <boost/log/trivial.hpp>
+#include <boost/math/distributions/normal.hpp>
 
 #include <iostream>
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    using namespace boost::math;
+    BOOST_LOG_TRIVIAL(info) << "Hello world";
+    normal_distribution<> distribution(0, 1);
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

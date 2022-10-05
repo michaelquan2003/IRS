@@ -34,25 +34,29 @@ public:
     }
     break;
     default:
-      throw std::invalid_argument("Does not recognize frequency other than yearly, semi-annual, and quarterly");
+      throw std::invalid_argument("Does not recognize frequency other than yearly, semi-annually, and quarterly");
     }
+    n_ = 1 / step_;
   };
   virtual ~TermStructure() = default;
 
-  double GetPar(Time t) {
-    
-  }
+  double GetPar(Time t);
 
   double GetZero(Time t) {
     return (*interpolater_)(t);
   }
 
-  double GetForward();
+  double GetForward(Time t);
 
-  double GetDiscountFactor();
+  double GetDiscountFactor(Time t);
 
 protected:
   std::shared_ptr<Interpolation::Interpolator1D> interpolater_;
   double step_;
+  double n_;
+
+protected:
+  double computeParRate(Time t);
+  double computeForwardRate(Time t);
 };
 }

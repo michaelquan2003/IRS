@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
+#include "Defines.h"
 
 namespace Tools{
 namespace Sort {
@@ -67,17 +68,15 @@ std::vector<T> sort(std::vector<T> v) {
 }
 }
 
-constexpr double EPSILON = 1E-6;
-
 template<class T>
-std::vector<T> linspace(T start, T end, std::size_t num_ptrs) {
+std::vector<T> linspace(T start, T end, SizeT num_ptrs) {
   if (num_ptrs < 1) {
     throw std::invalid_argument("Num of ptrs cannot be smaller than 1");
   }
   std::vector<T> output;
   output.reserve(num_ptrs);
   T step = (end - start) / (num_ptrs - 1);
-  for (std::size_t i = 0; i < num_ptrs; i++) {
+  for (SizeT i = 0; i < num_ptrs; i++) {
     auto value = start + i * step;
     output.push_back(value);
   }

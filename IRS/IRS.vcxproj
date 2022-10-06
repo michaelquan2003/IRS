@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LinearInterpolation.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TermStructure.cpp" />
   </ItemGroup>
@@ -134,6 +135,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Defines.h" />
     <ClInclude Include="LinearInterpolation.h" />
     <ClInclude Include="TermStructure.h" />
     <ClInclude Include="Utilities.h" />

@@ -7,15 +7,15 @@
 
 int main()
 {
-  auto ttms = Tools::linspace(0.5, 3., 6);
-  std::vector<double>zero_rates {0.02, 0.024024, 0.027669, 0.030974, 0.033975, 0.036701};
-  IR::TermStructure term_structure(ttms, zero_rates, IR::TermStructure::Frequency::SemiAnnually);
+  auto ttms = Tools::linspace(0., 3., 6);
+  std::vector<double>forward_rates {0.02, 0.024024, 0.027669, 0.030974, 0.033975, 0.036701};
+  IR::TermStructureForwardSimple term_structure(ttms, forward_rates, IR::Frequency::SemiAnnually);
   try {
     auto ttms_out = Tools::linspace(0.5, 3., 11);
     for (auto& ttm : ttms_out) {
       std::cout << "TTM:" << ttm << std::endl;
       std::cout << "ZERO: " << term_structure.GetZero(ttm) << std::endl;
-      std::cout<< "PAR: " << term_structure.GetPar(ttm) << std::endl;
+      std::cout<<  "PAR: " << term_structure.GetPar(ttm) << std::endl;
       std::cout << "Forward: " << term_structure.GetForward(ttm) << std::endl;
       std::cout << "Discount factor: " << term_structure.GetDiscountFactor(ttm) << std::endl;
       std::cout<<std::endl;

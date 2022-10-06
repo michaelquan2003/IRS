@@ -6,9 +6,9 @@ namespace Interpolation {
 class Interpolator1D {
 public:
 
-  Interpolator1D(const std::vector<double>& xs, const std::vector<double>& ys, bool is_sorted=false) : xs_(xs), ys_(ys) 
+  Interpolator1D(const std::vector<X>& xs, const std::vector<Y>& ys, bool is_sorted=false) : xs_(xs), ys_(ys) 
   {
-    if (xs.size() != ys.size()) {
+    if (!is_validated()) {
       throw std::runtime_error("Xs size is not equal to ys size!");
     }
     if (!is_sorted) {
@@ -16,19 +16,31 @@ public:
     }
   };
   virtual ~Interpolator1D() {};
-  virtual double operator()(double x) = 0;
+  virtual double operator()(X x) = 0;
+  static std::shared_ptr<Interpolator1D> MakeInterpolator(const std::vector<double>& xs, const std::vector<double>& ys, const InterpolationMethod& method);
+
+  std::vector<std::pair<X, Y>> GetParams() const;
+  void SetParams(const std::vector<std::pair<X, Y>>&);
 
 protected:
-  std::vector<double> xs_;
-  std::vector<double> ys_;
+  bool is_validated() const{
+    if (xs_.size() == ys_.size()) {
+      return true;
+    }
+    return false;
+  }
+
+protected:
+  std::vector<X> xs_;
+  std::vector<Y> ys_;
 
 };
 
 class LinearInterpolation1D : public Interpolator1D {
 public:
-  LinearInterpolation1D(const std::vector<double>& xs, const std::vector<double>& ys, bool is_sorted = false) : Interpolator1D(xs, ys, is_sorted) {};
+  LinearInterpolation1D(const std::vector<X>& xs, const std::vector<Y>& ys, bool is_sorted = false) : Interpolator1D(xs, ys, is_sorted) {};
   virtual ~LinearInterpolation1D() {};
-  virtual double operator()(double x) override {
+  virtual double operator()(X x) override {
     if (x <= xs_.front()) {
       return ys_.front();
     }

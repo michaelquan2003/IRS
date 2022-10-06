@@ -35,6 +35,20 @@ ParRate TermStructure::GetPar(Time t) {
   return par_rate_left + (par_rate_right - par_rate_left) / (ttm_right - ttm_left) * (t - ttm_left);
 }
 
+void TermStructure::BumpInPlace(BumpAmount amount) {
+  auto params = interpolater_->GetParams();
+  for (auto& param : params) {
+    param.second += amount;
+  }
+  interpolater_->SetParams(params);
+}
+
+std::shared_ptr<TermStructure> TermStructureZero::Bump(BumpAmount amount) const {
+  auto copy = std::make_shared<TermStructureZero>(*this);
+  copy->BumpInPlace(amount);
+  return copy;
+}
+
 ForwardRate TermStructureZero::computeForwardRate(SizeT num_step) {
   auto num_step_plus_1 = num_step + 1;
   auto ttm = num_step * step_;
@@ -69,6 +83,12 @@ DiscountFactor TermStructureZero::GetDiscountFactor(Time t) {
   return 1 / std::pow(1 + (zero_rate / n_), t * n_);
 }
 
+std::shared_ptr<TermStructure> TermStructureZeroSimple::Bump(BumpAmount amount) const {
+  auto copy = std::make_shared<TermStructureZeroSimple>(*this);
+  copy->BumpInPlace(amount);
+  return copy;
+}
+
 DiscountFactor TermStructureZeroSimple::GetDiscountFactor(Time t) {
   auto zero_rate = GetZero(t);
   auto disc = 1 / (1 + zero_rate * t);
@@ -81,6 +101,12 @@ ForwardRate TermStructureZeroSimple::GetForward(Time t) {
   auto disc_t_plus_1 = GetDiscountFactor(t_plus_1);
   auto forward_rate = (disc_t / disc_t_plus_1 - 1) * n_;
   return forward_rate;
+}
+
+std::shared_ptr<TermStructure> TermStructureForwardSimple::Bump(BumpAmount amount) const {
+  auto copy = std::make_shared<TermStructureForwardSimple>(*this);
+  copy->BumpInPlace(amount);
+  return copy;
 }
 
 DiscountFactor TermStructureForwardSimple::computeDiscountFactor(SizeT num_step) {

@@ -26,7 +26,11 @@ public:
 
   virtual DiscountFactor GetDiscountFactor(Time t) = 0;
 
+  virtual std::shared_ptr<TermStructure> Bump(BumpAmount amount) const = 0;
+
   virtual ParRate GetPar(Time t);
+
+  void BumpInPlace(BumpAmount amount);
 
 protected:
   std::shared_ptr<Interpolation::Interpolator1D> interpolater_;
@@ -52,6 +56,8 @@ public:
     return (*interpolater_)(t);
   }
 
+  virtual std::shared_ptr<TermStructure> Bump(BumpAmount amount) const override;
+
   virtual ForwardRate GetForward(Time t) override;
 
   virtual DiscountFactor GetDiscountFactor(Time t) override;
@@ -71,6 +77,8 @@ public:
   ) : TermStructureZero(ttms, zero_rates, freq, method) {};
 
   virtual ~TermStructureZeroSimple() = default;
+
+  virtual std::shared_ptr<TermStructure> Bump(BumpAmount amount) const override;
 
   virtual ForwardRate GetForward(Time t) override;
 
@@ -100,6 +108,8 @@ public:
   ) : TermStructureForward(ttms, fwd_rates, freq, method) {};
 
   virtual ~TermStructureForwardSimple() = default;
+
+  virtual std::shared_ptr<TermStructure> Bump(BumpAmount amount) const override;
 
   virtual ForwardRate GetForward(Time t) override {
     return (*interpolater_)(t);

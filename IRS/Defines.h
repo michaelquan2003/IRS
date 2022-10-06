@@ -13,6 +13,8 @@ using ForwardRate = double;
 using DiscountFactor = double;
 using ParRate = double;
 using Rate = double;
+using BumpAmount = double;
+using Value = double;
 
 enum class Frequency {
   Yearly,
@@ -20,6 +22,18 @@ enum class Frequency {
   Quarterly,
   Monthly
 };
+
+namespace Greek {
+using Stencils = std::vector<double>;
+using Weights = std::vector<double>;
+using Prices = std::vector<double>;
+using Step = double;
+using Order = SizeT;
+
+enum class FiniteDifferenceMethod {
+  Forward, Backward, Central
+};
+}
 
 namespace Instrument {
 using SwapRate = double;
@@ -31,7 +45,6 @@ using FloatLegSchedule = std::vector<double>;
 }
 
 namespace Pricer {
-using Value = double;
 using ProjectionCurve = TermStructure;
 using DiscountCurve = TermStructure;
 }

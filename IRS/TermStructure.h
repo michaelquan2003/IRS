@@ -4,19 +4,35 @@
 #include "LinearInterpolation.h"
 
 namespace IR {
-class TermStructure {
-  using Time = double;
-  using ZeroRate = double;
+using Time = double;
+using ZeroRate = double;
+using ForwardRate = double;
+using DiscountFactor = double;
+using ParRate = double;
 
-public:
-  enum class Frequency{
+enum class Frequency {
     Yearly,
     SemiAnnually,
     Quarterly
-  };
+};
 
-  explicit TermStructure() = default;
-  explicit TermStructure(const std::vector<Time>& ttms, const std::vector<ZeroRate>& zero_rates,
+class Termstructure {
+public:
+    virtual ~Termstructure() = default;
+
+    virtual ParRate GetPar(Time t) = 0;
+
+    virtual ZeroRate GetZero(Time t) = 0;
+
+    virtual ForwardRate GetForward(Time t) = 0;
+
+    virtual DiscountFactor GetDiscountFactor(Time t) = 0;
+};
+
+class TermStructure_Zero : public Termstructure{
+public:
+  explicit TermStructure_Zero() = default;
+  explicit TermStructure_Zero(const std::vector<Time>& ttms, const std::vector<ZeroRate>& zero_rates,
                 const Frequency& freq = Frequency::Quarterly)
   {
     interpolater_ = std::make_shared<Interpolation::LinearInterpolation1D>(ttms, zero_rates);
@@ -38,17 +54,17 @@ public:
     }
     n_ = 1 / step_;
   };
-  virtual ~TermStructure() = default;
+  virtual ~TermStructure_Zero() = default;
 
-  double GetPar(Time t);
+  virtual ParRate GetPar(Time t) override;
 
-  double GetZero(Time t) {
+  virtual ZeroRate GetZero(Time t) override{
     return (*interpolater_)(t);
   }
 
-  double GetForward(Time t);
+  virtual ForwardRate GetForward(Time t) override;
 
-  double GetDiscountFactor(Time t);
+  virtual DiscountFactor GetDiscountFactor(Time t) override;
 
 protected:
   std::shared_ptr<Interpolation::Interpolator1D> interpolater_;
@@ -56,7 +72,7 @@ protected:
   double n_;
 
 protected:
-  double computeParRate(Time t);
-  double computeForwardRate(Time t);
+  ParRate computeParRate(Time t);
+  ForwardRate computeForwardRate(Time t);
 };
 }

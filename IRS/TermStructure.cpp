@@ -1,7 +1,7 @@
 #include "TermStructure.h"
 
 namespace IR {
-double TermStructure::computeForwardRate(Time ttm) {
+double TermStructure_Zero::computeForwardRate(Time ttm) {
   auto num_step = static_cast<std::size_t>(ttm / step_);
   auto num_step_plus_1 = num_step + 1;
   auto ttm_plus_1 = num_step_plus_1 * step_;
@@ -11,7 +11,7 @@ double TermStructure::computeForwardRate(Time ttm) {
   return forward_rate;
 }
 
-double TermStructure::computeParRate(Time ttm) {
+double TermStructure_Zero::computeParRate(Time ttm) {
   auto num_step = static_cast<std::size_t>(ttm / step_);
   if (num_step == 1) {
     return GetZero(ttm);
@@ -26,7 +26,7 @@ double TermStructure::computeParRate(Time ttm) {
   return par_rate;
 }
 
-double TermStructure::GetPar(Time t) {
+double TermStructure_Zero::GetPar(Time t) {
   auto num_step = static_cast<std::size_t>(std::floor(t / step_));
   if (Tools::is_equal(num_step, static_cast<std::size_t>(0))) {
     return GetZero(t);
@@ -45,7 +45,7 @@ double TermStructure::GetPar(Time t) {
 
 }
 
-double TermStructure::GetForward(Time t) {
+double TermStructure_Zero::GetForward(Time t) {
   auto num_step = static_cast<std::size_t>(std::floor(t / step_));
   if (Tools::is_equal(num_step, static_cast<std::size_t>(0))) {
     return GetZero(t);
@@ -63,7 +63,7 @@ double TermStructure::GetForward(Time t) {
   return forward_rate_left + (forward_rate_right - forward_rate_left) / (ttm_right - ttm_left) * (t - ttm_left);
 }
 
-double TermStructure::GetDiscountFactor(Time t) {
+double TermStructure_Zero::GetDiscountFactor(Time t) {
   auto zero_rate = GetZero(t);
   return 1 / std::pow(1 + (zero_rate / n_), t * n_);
 }

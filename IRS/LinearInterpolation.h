@@ -21,6 +21,7 @@ public:
 
   std::vector<std::pair<X, Y>> GetParams() const;
   void SetParams(const std::vector<std::pair<X, Y>>&);
+  void AddParam(const std::pair<X, Y>&);
 
 protected:
   bool is_validated() const{

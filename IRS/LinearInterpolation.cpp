@@ -32,5 +32,12 @@ void Interpolator1D::SetParams(const std::vector<std::pair<X, Y>>& params) {
     xs_[i] = param.first;
     ys_[i] = param.second;
   }
+  Tools::Sort::sortInPlace(ys_, xs_);
+}
+
+void Interpolator1D::AddParam(const std::pair<X, Y>& param) {
+  xs_.push_back(param.first);
+  ys_.push_back(param.second);
+  Tools::Sort::sortInPlace(ys_, xs_);
 }
 }

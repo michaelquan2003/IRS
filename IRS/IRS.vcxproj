@@ -127,16 +127,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Instrument.cpp" />
     <ClCompile Include="LinearInterpolation.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Pricer.cpp" />
     <ClCompile Include="TermStructure.cpp" />
+    <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bootstrapper.h" />
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="Instrument.h" />
     <ClInclude Include="LinearInterpolation.h" />
+    <ClInclude Include="Pricer.h" />
     <ClInclude Include="TermStructure.h" />
     <ClInclude Include="Utilities.h" />
   </ItemGroup>

@@ -14,24 +14,8 @@ public:
     const Interpolation::InterpolationMethod& method = Interpolation::InterpolationMethod::Linear
   ) {
     interpolater_ = Interpolation::Interpolator1D::MakeInterpolator(ttms, rates, method);
-
-    switch (freq) {
-    case Frequency::Yearly: {
-      step_ = 1;
-    }
-    break;
-    case Frequency::SemiAnnually: {
-      step_ = 0.5;
-    }
-    break;
-    case Frequency::Quarterly: {
-      step_ = 0.25;
-    }
-    break;
-    default:
-      throw std::invalid_argument("Does not recognize frequency other than yearly, semi-annually, and quarterly");
-    }
-    n_ = 1 / step_;
+    step_ = Tools::GetStepPerYear(freq);
+    n_ = Tools::GetNumPerYear(freq);
   }
 
   virtual ~TermStructure() = default;
@@ -117,11 +101,11 @@ public:
 
   virtual ~TermStructureForwardSimple() = default;
 
-  virtual ZeroRate GetZero(Time t) override;
-
   virtual ForwardRate GetForward(Time t) override {
     return (*interpolater_)(t);
   }
+
+  virtual ZeroRate GetZero(Time t) override;
 
   virtual DiscountFactor GetDiscountFactor(Time t) override;
 

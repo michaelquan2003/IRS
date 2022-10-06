@@ -4,9 +4,18 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
+#include <map>
+#include <fstream> 
+#include <ios>
+#include <iostream>
+#include <string>
 #include "Defines.h"
 
-namespace Tools{
+namespace Tools {
+
+double GetStepPerYear(const IR::Frequency& freq);
+double GetNumPerYear(const IR::Frequency& freq);
+
 namespace Sort {
 template <typename A, typename B>
 void zip(
@@ -57,7 +66,7 @@ std::vector<std::pair<T1, T2>> sort(std::vector<std::pair<T1, T2>> v, int onFirs
 }
 
 template<class T>
-void sortInPlace(std::vector<T>& v, bool ascending=true) {
+void sortInPlace(std::vector<T>& v, bool ascending = true) {
   std::sort(v.begin(), v.end(), [&ascending](const T& lhs, const T& rhs) {return ascending ? lhs < rhs : lhs > rhs; });
 }
 
@@ -75,6 +84,10 @@ std::vector<T> linspace(T start, T end, SizeT num_ptrs) {
   }
   std::vector<T> output;
   output.reserve(num_ptrs);
+  if (num_ptrs == 1) {
+    output.push_back(start);
+    return output;
+  }
   T step = (end - start) / (num_ptrs - 1);
   for (SizeT i = 0; i < num_ptrs; i++) {
     auto value = start + i * step;
@@ -83,11 +96,19 @@ std::vector<T> linspace(T start, T end, SizeT num_ptrs) {
   return output;
 }
 
-inline bool is_equal(double a, double b) {
-  if (std::abs(a - b) < EPSILON) {
+template<class T>
+bool is_equal(T a, T b) {
+  auto a_d = static_cast<double>(a);
+  auto b_d = static_cast<double>(b);
+  if (std::abs(a_d - b_d) < EPSILON) {
     return true;
   }
   return false;
+}
+
+namespace Csv {
+void ToFile(const std::string& filename, const std::vector<std::vector<std::string>>& data, const std::string& separator, bool transpose, std::string& errormessage, bool append = false);
+void ToFile(const std::string& fileName, const std::map<std::string, std::vector<double>>& data, const std::string& seperator);
 }
 
 }

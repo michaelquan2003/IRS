@@ -4,6 +4,8 @@
 #include "Utilities.h"
 
 namespace Interpolation {
+
+// Abstract class for Interpolation
 class Interpolator1D {
  public:
   Interpolator1D(const std::vector<X>& xs, const std::vector<Y>& ys,
@@ -42,6 +44,7 @@ class Interpolator1D {
   std::vector<Y> ys_;
 };
 
+//Linear interpolation in 1D
 class LinearInterpolation1D : public Interpolator1D {
  public:
   LinearInterpolation1D(const std::vector<X>& xs, const std::vector<Y>& ys,

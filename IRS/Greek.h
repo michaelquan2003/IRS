@@ -4,6 +4,8 @@
 
 namespace IR {
 namespace Greek {
+
+// Abstract class for Greek. This class uses finite difference coefficients to compute stencils and weights
 class Greek {
  public:
   Greek() = default;
@@ -43,6 +45,7 @@ class Greek {
   virtual void setStencilsandWeights() = 0;
 };
 
+//DV01
 class DV01 : public Greek {
  public:
   explicit DV01(Step h, const FiniteDifferenceMethod method =
@@ -56,6 +59,7 @@ class DV01 : public Greek {
   virtual void setStencilsandWeights() override;
 };
 
+//Convexity
 class Convexity : public Greek {
  public:
   explicit Convexity(Step h, const FiniteDifferenceMethod method =

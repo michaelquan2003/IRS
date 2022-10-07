@@ -6,6 +6,8 @@
 #include "LinearInterpolation.h"
 
 namespace IR {
+
+// Abstract Term Structure class
 class TermStructure {
  public:
   explicit TermStructure(const std::vector<Time>& ttms,
@@ -56,6 +58,7 @@ class TermStructure {
   ParRate computeParRate(SizeT num_step);
 };
 
+// Term Structure for Zero Rate, assuming k-times-per-year compounding
 class TermStructureZero : public TermStructure {
  public:
   explicit TermStructureZero() = default;
@@ -79,6 +82,7 @@ class TermStructureZero : public TermStructure {
   ForwardRate computeForwardRate(SizeT num_step);
 };
 
+// Term Structure for Zero Rate, assuming simple-compounded
 class TermStructureZeroSimple final : public TermStructureZero {
  public:
   explicit TermStructureZeroSimple() = default;
@@ -102,6 +106,8 @@ class TermStructureZeroSimple final : public TermStructureZero {
   ZeroRate GetZeroFromForward(ForwardRate forward, Time t1, Time t2);
 };
 
+// Term Structure for Forward Rate, assuming k-times-per-year compounding. 
+// Not implemented
 class TermStructureForward : public TermStructure {
  public:
   explicit TermStructureForward(
@@ -114,6 +120,7 @@ class TermStructureForward : public TermStructure {
   virtual ~TermStructureForward() = default;
 };
 
+// Term Structure for Forward Rate, assuming simply-compounded
 class TermStructureForwardSimple final : public TermStructureForward {
  public:
   explicit TermStructureForwardSimple() = default;

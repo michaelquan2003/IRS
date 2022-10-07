@@ -5,6 +5,8 @@
 
 namespace IR {
 namespace Bootstrap {
+
+//Abstract Bootstrapper
 class Bootstrapper {
  public:
   explicit Bootstrapper() = default;
@@ -28,6 +30,7 @@ class Bootstrapper {
       const std::vector<std::shared_ptr<Instrument::IRSwap>>& instrs);
 };
 
+//Bootstrapper assuming projection curve and discount curve to be the same
 class BootstrapperSameCurve : public Bootstrapper {
  public:
   explicit BootstrapperSameCurve() : Bootstrapper(){};
@@ -40,6 +43,7 @@ class BootstrapperSameCurve : public Bootstrapper {
   virtual std::shared_ptr<TermStructure> Bootstrap() override;
 };
 
+// Bootstrapper assuming projection curve and discount curve to be different
 class BootstrapperDiffCurve : public Bootstrapper {
  public:
   explicit BootstrapperDiffCurve() : Bootstrapper(){};

@@ -4,6 +4,8 @@
 
 namespace IR {
 namespace Pricer {
+
+//Interest Rate Swap Pricer. We could make abstract base class and do inheritance if we actually have different instruments to price
 class IRSwapPricer final {
  public:
   explicit IRSwapPricer() = default;

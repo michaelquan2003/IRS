@@ -1,16 +1,19 @@
-// IRS.cpp : This file contains the 'main' function. Program execution begins
+// main.cpp : This file contains the 'main' function. Program execution begins
 // and ends there.
 //
 #include <boost/log/trivial.hpp>
 #include <iostream>
 
 #include "Bootstrapper.h"
+#include "Greek.h"
 #include "Instrument.h"
 #include "Pricer.h"
 #include "TermStructure.h"
 
 namespace {
-std::vector<std::shared_ptr<IR::Instrument::IRSwap>> MakeSwaps() {
+// Convenient method for creating swaps
+std::vector<std::shared_ptr<IR::Instrument::IRSwap>> MakeSwaps(
+    bool is_libor_swap = true) {
   std::vector<std::shared_ptr<IR::Instrument::IRSwap>> output;
   auto notional = 100.;
   auto num_swap = 50;
@@ -18,6 +21,9 @@ std::vector<std::shared_ptr<IR::Instrument::IRSwap>> MakeSwaps() {
   auto ttms = Tools::linspace(1., last_year, num_swap);
   for (auto& ttm : ttms) {
     auto swap_rate = 0.04 + 0.02 * ttm / 30;
+    if (!is_libor_swap) {
+      swap_rate -= 0.01;
+    }
     auto swap =
         std::make_shared<IR::Instrument::IRSwap>(notional, swap_rate, ttm);
     output.push_back(swap);
@@ -26,45 +32,93 @@ std::vector<std::shared_ptr<IR::Instrument::IRSwap>> MakeSwaps() {
 }
 }  // namespace
 
-int main() {
+namespace TestCase {
+// Test Case 1: Test term structures can reprice all libor swaps to par.
+// Projection and Discount curve are both LIBOR curve
+void TestCase1() {
   using namespace IR;
   using namespace std;
-  auto swaps = MakeSwaps();
+  auto libor_swaps = MakeSwaps(true);
   double zero_rate_3m = 0.02;
   Pricer::IRSwapPricer pricer;
-  Bootstrap::BootstrapperSameCurve bootstrapper(swaps, zero_rate_3m);
+
+  Bootstrap::BootstrapperSameCurve bootstrapper(libor_swaps, zero_rate_3m);
   auto term_structure = bootstrapper.Bootstrap();
   std::vector<double> npvs;
-  for (auto& swap : swaps) {
-    auto npv = pricer.NPV(swap, term_structure, term_structure);
+  cout << "Test Case 1" << endl;
+  for (auto& libor_swap : libor_swaps) {
+    auto npv = pricer.NPV(libor_swap, term_structure, term_structure);
+    // NPV below should all be zero
+    cout << "TTM: " << libor_swap->GetTTM() << ", NPV: " << npv << endl;
     npvs.push_back(npv);
-  }
-
-  try {
-    auto ttms_out = Tools::linspace(0.5, 3., 11);
-    for (auto& ttm : ttms_out) {
-      std::cout << "TTM:" << ttm << std::endl;
-      std::cout << "ZERO: " << term_structure->GetZero(ttm) << std::endl;
-      std::cout << "PAR: " << term_structure->GetPar(ttm) << std::endl;
-      std::cout << "Forward: " << term_structure->GetForward(ttm) << std::endl;
-      std::cout << "Discount factor: " << term_structure->GetDiscountFactor(ttm)
-                << std::endl;
-      std::cout << std::endl;
-    }
-  } catch (std::exception e) {
-    std::cout << e.what() << std::endl;
   }
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+// Test Case 2: Test term structures can reprice all libor swaps to par.
+// Projection curve using LIBOR CURVE and Discount curve using OIS Curve
+void TestCase2() {
+  using namespace IR;
+  using namespace std;
+  auto ois_swaps = MakeSwaps(false);
+  auto libor_swaps = MakeSwaps(true);
+  double zero_rate_3m = 0.02;
+  Pricer::IRSwapPricer pricer;
 
-// Tips for Getting Started:
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add
-//   Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project
-//   and select the .sln file
+  Bootstrap::BootstrapperSameCurve bootstrapper_same_curve(ois_swaps,
+                                                           zero_rate_3m);
+  auto ois_term_structure = bootstrapper_same_curve.Bootstrap();
+
+  Bootstrap::BootstrapperDiffCurve bootstrapper_diff_curve(
+      libor_swaps, zero_rate_3m, ois_term_structure);
+  auto libor_term_structure = bootstrapper_diff_curve.Bootstrap();
+  std::vector<double> npvs;
+  cout << "Test Case 2" << endl;
+  for (auto& libor_swap : libor_swaps) {
+    auto npv = pricer.NPV(libor_swap, libor_term_structure, ois_term_structure);
+    // NPV below should all be zero
+    cout << "TTM: " << libor_swap->GetTTM() << ", NPV: " << npv << endl;
+    npvs.push_back(npv);
+  }
+}
+
+// Test Case 3: Test DV01 and Convexity
+void TestCase3() {
+  std::cout << "Test Case 3" << std::endl;
+  using namespace IR;
+  double h = 0.0001;  // 1 basis point step size
+  Greek::DV01 dv01(h);
+  Greek::Convexity convexity(h);
+}
+
+// Test Case 4: Test Term Structure is working properly
+void TestCase4() {
+  std::cout << "Test Case 4" << std::endl;
+  using namespace IR;
+  auto ttms = Tools::linspace(0.5, 3., 6);
+  std::vector<double> zero_rates{0.02,     0.024024, 0.027669,
+                                 0.030974, 0.033975, 0.036701};
+  IR::TermStructureZeroSimple term_structure(ttms, zero_rates,
+                                             IR::Frequency::SemiAnnually);
+  auto ttms_out = Tools::linspace(0.5, 3., 11);
+  for (auto& ttm : ttms_out) {
+    std::cout << "TTM:" << ttm << std::endl;
+    std::cout << "ZERO: " << term_structure.GetZero(ttm) << std::endl;
+    std::cout << "PAR: " << term_structure.GetPar(ttm) << std::endl;
+    std::cout << "Forward: " << term_structure.GetForward(ttm) << std::endl;
+    std::cout << "Discount factor: " << term_structure.GetDiscountFactor(ttm)
+              << std::endl;
+    std::cout << std::endl;
+  }
+}
+}  // namespace TestCase
+
+int main() {
+  try {
+    TestCase::TestCase1();
+    TestCase::TestCase2();
+    TestCase::TestCase3();
+    TestCase::TestCase4();
+  } catch (const std::exception& e) {
+    std::cout << "Error: " << e.what() << std::endl;
+  }
+}

@@ -45,11 +45,15 @@ class BootstrapperDiffCurve : public Bootstrapper {
   explicit BootstrapperDiffCurve() : Bootstrapper(){};
   explicit BootstrapperDiffCurve(
       const std::vector<std::shared_ptr<Instrument::IRSwap>>& instrs,
-      ZeroRate zero_rate_3m)
-      : Bootstrapper(instrs, zero_rate_3m) {}
+      ZeroRate zero_rate_3m,
+      const std::shared_ptr<TermStructure>& discount_curve)
+      : Bootstrapper(instrs, zero_rate_3m), discount_curve_(discount_curve) {}
 
   virtual ~BootstrapperDiffCurve() = default;
   virtual std::shared_ptr<TermStructure> Bootstrap() override;
+
+protected:
+  const std::shared_ptr<TermStructure> discount_curve_;
 };
 }  // namespace Bootstrap
 }  // namespace IR

@@ -36,6 +36,9 @@
     <ClCompile Include="Greek.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Bootstrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

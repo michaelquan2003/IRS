@@ -3,12 +3,10 @@
 namespace IR {
 namespace Greek {
 
-Value Greek::Compute(
-  const std::shared_ptr<Pricer::IRSwapPricer>& pricer,
-  const std::shared_ptr<Instrument::IRSwap>& instr,
-  const std::shared_ptr<Pricer::ProjectionCurve>& proj_curve,
-  const std::shared_ptr<Pricer::DiscountCurve>& disc_curve
-) {
+Value Greek::Compute(const std::shared_ptr<Pricer::IRSwapPricer>& pricer,
+                     const std::shared_ptr<Instrument::IRSwap>& instr,
+                     const std::shared_ptr<Pricer::ProjectionCurve>& proj_curve,
+                     const std::shared_ptr<Pricer::DiscountCurve>& disc_curve) {
   for (SizeT i = 0; i < prices_.size(); i++) {
     auto bump_amount = stencils_[i] * h_;
     auto bumped_proj_curve = proj_curve->Bump(bump_amount);
@@ -25,56 +23,48 @@ Value Greek::Compute(
 
 void DV01::setStencilsandWeights() {
   switch (method_) {
-  case FiniteDifferenceMethod::Central:
-  {
-    stencils_ = { -1, 0, 1 };
-    weights_ = { -0.5, 0, 0.5 };
-  }
-  break;
-  case FiniteDifferenceMethod::Backward:
-  {
-    stencils_ = { -1, 0 };
-    weights_ = { -1, 1 };
-  }
-  break;
-  case FiniteDifferenceMethod::Forward:
-  {
-    stencils_ = { 0,  1 };
-    weights_  = { -1, 1 };
-  }
-  break;
-  default:
-    throw std::invalid_argument("Only finite difference method forward, backward, central are supported!");
+    case FiniteDifferenceMethod::Central: {
+      stencils_ = {-1, 0, 1};
+      weights_ = {-0.5, 0, 0.5};
+    } break;
+    case FiniteDifferenceMethod::Backward: {
+      stencils_ = {-1, 0};
+      weights_ = {-1, 1};
+    } break;
+    case FiniteDifferenceMethod::Forward: {
+      stencils_ = {0, 1};
+      weights_ = {-1, 1};
+    } break;
+    default:
+      throw std::invalid_argument(
+          "Only finite difference method forward, backward, central are "
+          "supported!");
   }
   prices_.resize(stencils_.size());
 }
 
 void Convexity::setStencilsandWeights() {
   switch (method_) {
-  case FiniteDifferenceMethod::Central:
-  {
-    stencils_ = { -1, 0, 1 };
-    weights_ = { 1, -2, 1 };
-  }
-  break;
-  case FiniteDifferenceMethod::Backward:
-  {
-    stencils_ = { -2, -1, 0 };
-    weights_ = { 1, -2, 1 };
-  }
-  break;
-  case FiniteDifferenceMethod::Forward:
-  {
-    stencils_ = { 0, 1, 2 };
-    weights_ = { 1, -2, 1 };
-  }
-  break;
-  default:
-    throw std::invalid_argument("Only finite difference method forward, backward, central are supported!");
+    case FiniteDifferenceMethod::Central: {
+      stencils_ = {-1, 0, 1};
+      weights_ = {1, -2, 1};
+    } break;
+    case FiniteDifferenceMethod::Backward: {
+      stencils_ = {-2, -1, 0};
+      weights_ = {1, -2, 1};
+    } break;
+    case FiniteDifferenceMethod::Forward: {
+      stencils_ = {0, 1, 2};
+      weights_ = {1, -2, 1};
+    } break;
+    default:
+      throw std::invalid_argument(
+          "Only finite difference method forward, backward, central are "
+          "supported!");
   }
   prices_.resize(stencils_.size());
 }
 
-}
+}  // namespace Greek
 
-}
+}  // namespace IR

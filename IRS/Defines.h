@@ -16,12 +16,7 @@ using Rate = double;
 using BumpAmount = double;
 using Value = double;
 
-enum class Frequency {
-  Yearly,
-  SemiAnnually,
-  Quarterly,
-  Monthly
-};
+enum class Frequency { Yearly, SemiAnnually, Quarterly, Monthly };
 
 namespace Greek {
 using Stencils = std::vector<double>;
@@ -30,10 +25,8 @@ using Prices = std::vector<double>;
 using Step = double;
 using Order = SizeT;
 
-enum class FiniteDifferenceMethod {
-  Forward, Backward, Central
-};
-}
+enum class FiniteDifferenceMethod { Forward, Backward, Central };
+}  // namespace Greek
 
 namespace Instrument {
 using SwapRate = double;
@@ -42,13 +35,14 @@ using FixedLegFrequency = Frequency;
 using FloatLegFrequency = Frequency;
 using FixedLegSchedule = std::vector<double>;
 using FloatLegSchedule = std::vector<double>;
-}
+}  // namespace Instrument
 
 namespace Pricer {
 using ProjectionCurve = TermStructure;
 using DiscountCurve = TermStructure;
-}
-}
+}  // namespace Pricer
+
+}  // namespace IR
 
 namespace Tools {
 constexpr double EPSILON = 1E-6;
@@ -58,10 +52,6 @@ namespace Interpolation {
 using X = double;
 using Y = double;
 
-enum class InterpolationMethod {
-  Linear, LogLinear, CubicSpline, AkimaSpline
-};
+enum class InterpolationMethod { Linear, LogLinear, CubicSpline, AkimaSpline };
 
-
-
-}
+}  // namespace Interpolation

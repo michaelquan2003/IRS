@@ -1,7 +1,9 @@
 #include "LinearInterpolation.h"
 
 namespace Interpolation {
-std::shared_ptr<Interpolator1D> Interpolator1D::MakeInterpolator(const std::vector<double>& xs, const std::vector<double>& ys, const InterpolationMethod& method) {
+std::shared_ptr<Interpolator1D> Interpolator1D::MakeInterpolator(
+    const std::vector<X>& xs, const std::vector<Y>& ys,
+    const InterpolationMethod& method) {
   switch (method) {
     case InterpolationMethod::Linear:
       return std::make_shared<LinearInterpolation1D>(xs, ys);
@@ -23,7 +25,8 @@ std::vector<std::pair<X, Y>> Interpolator1D::GetParams() const {
 
 void Interpolator1D::SetParams(const std::vector<std::pair<X, Y>>& params) {
   if (params.size() == 0) {
-    throw std::runtime_error("Input params size cannot be zero when setting params");
+    throw std::runtime_error(
+        "Input params size cannot be zero when setting params");
   }
   xs_.resize(params.size());
   ys_.resize(params.size());
@@ -40,4 +43,4 @@ void Interpolator1D::AddParam(const std::pair<X, Y>& param) {
   ys_.push_back(param.second);
   Tools::Sort::sortInPlace(ys_, xs_);
 }
-}
+}  // namespace Interpolation

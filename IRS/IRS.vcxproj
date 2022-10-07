@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bootstrapper.cpp" />
     <ClCompile Include="Greek.cpp" />
     <ClCompile Include="Instrument.cpp" />
     <ClCompile Include="LinearInterpolation.cpp" />

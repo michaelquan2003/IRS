@@ -1,7 +1,6 @@
 // main.cpp : This file contains the 'main' function. Program execution begins
 // and ends there.
 //
-#include <boost/log/trivial.hpp>
 #include <iostream>
 
 #include "Bootstrapper.h"
@@ -31,6 +30,7 @@ std::vector<std::shared_ptr<IR::Instrument::IRSwap>> MakeSwaps(
   return output;
 }
 
+// Convenient method for creating discount curve
 std::shared_ptr<IR::TermStructure> MakeDiscCurve(
     bool is_libor_curve = true) {
   auto num_steps = 200;

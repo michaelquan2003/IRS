@@ -114,14 +114,4 @@ bool is_equal(T a, T b) {
   return false;
 }
 
-namespace Csv {
-void ToFile(const std::string& filename,
-            const std::vector<std::vector<std::string>>& data,
-            const std::string& separator, bool transpose,
-            std::string& errormessage, bool append = false);
-void ToFile(const std::string& fileName,
-            const std::map<std::string, std::vector<double>>& data,
-            const std::string& seperator);
-}  // namespace Csv
-
 }  // namespace Tools

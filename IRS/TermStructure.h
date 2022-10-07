@@ -12,7 +12,7 @@ class TermStructure {
                          const std::vector<Rate>& rates,
                          const Frequency& freq = Frequency::Quarterly,
                          const Interpolation::InterpolationMethod& method =
-                             Interpolation::InterpolationMethod::Linear) {
+                             Interpolation::InterpolationMethod::Linear) : method_(method) {
     interpolater_ =
         Interpolation::Interpolator1D::MakeInterpolator(ttms, rates, method);
     step_ = Tools::GetStepPerYear(freq);
@@ -20,6 +20,13 @@ class TermStructure {
   }
 
   virtual ~TermStructure() = default;
+
+  TermStructure(const TermStructure& other) {
+    n_ = other.n_;
+    step_ = other.step_;
+    method_ = other.method_;
+    interpolater_ = Interpolation::Interpolator1D::MakeInterpolator(other.interpolater_->GetXs(), other.interpolater_->GetYs(), other.method_);
+  }
 
   virtual ZeroRate GetZero(Time t) = 0;
 
@@ -43,6 +50,7 @@ class TermStructure {
   std::shared_ptr<Interpolation::Interpolator1D> interpolater_;
   double step_;
   double n_;
+  Interpolation::InterpolationMethod method_;
 
  protected:
   ParRate computeParRate(SizeT num_step);
@@ -81,6 +89,8 @@ class TermStructureZeroSimple final : public TermStructureZero {
           Interpolation::InterpolationMethod::Linear)
       : TermStructureZero(ttms, zero_rates, freq, method){};
 
+  static ZeroRate GetZeroFromDisc(DiscountFactor disc, Time t);
+
   virtual ~TermStructureZeroSimple() = default;
 
   virtual std::shared_ptr<TermStructure> Bump(BumpAmount amount) const override;
@@ -89,7 +99,7 @@ class TermStructureZeroSimple final : public TermStructureZero {
 
   virtual DiscountFactor GetDiscountFactor(Time t) override;
 
-  static ZeroRate GetZeroFromDisc(DiscountFactor disc, Time t);
+  ZeroRate GetZeroFromForward(ForwardRate forward, Time t1, Time t2);
 };
 
 class TermStructureForward : public TermStructure {

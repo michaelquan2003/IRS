@@ -17,9 +17,13 @@ Value IRSwapPricer::NPV(const std::shared_ptr<Instrument::IRSwap>& instr,
     annuity_factor += disc * dt;
   }
   fixed_sum = notional * swap_rate * annuity_factor;
-  auto float_sum =
-      notional * (proj_curve->GetDiscountFactor(float_schedule.front()) -
-                  proj_curve->GetDiscountFactor(float_schedule.back()));
+  double float_sum = 0.;
+  for (SizeT i = 0; i < float_schedule.size() - 1; i++) {
+    auto dt = float_schedule[i+1] - float_schedule[i]; 
+    auto disc = disc_curve->GetDiscountFactor(float_schedule[i+1]);
+    float_sum += proj_curve->GetForward(float_schedule[i]) * dt * disc;
+  }
+  float_sum *= notional;
   auto multiplier = is_pay_fixed ? 1 : -1;
   return multiplier * (float_sum - fixed_sum);
 }

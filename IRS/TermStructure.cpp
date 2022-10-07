@@ -111,6 +111,13 @@ ZeroRate TermStructureZeroSimple::GetZeroFromDisc(DiscountFactor disc, Time t) {
   return zero_rate;
 }
 
+ZeroRate TermStructureZeroSimple::GetZeroFromForward(ForwardRate forward,
+                                                     Time t1, Time t2) {
+  auto tau = t2 - t1;
+  auto disc_t2 = GetDiscountFactor(t1) / (1 + forward * tau);
+  return (1 - disc_t2) / (t2 * disc_t2);
+}
+
 ForwardRate TermStructureZeroSimple::GetForward(Time t) {
   auto t_plus_1 = t + step_;
   auto disc_t = GetDiscountFactor(t);

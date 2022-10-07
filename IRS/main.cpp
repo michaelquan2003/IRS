@@ -16,8 +16,8 @@ std::vector<std::shared_ptr<IR::Instrument::IRSwap>> MakeSwaps(
     bool is_libor_swap = true) {
   std::vector<std::shared_ptr<IR::Instrument::IRSwap>> output;
   auto notional = 100.;
-  auto num_swap = 50;
-  auto last_year = 50.;
+  auto num_swap = 10;
+  auto last_year = 10.;
   auto ttms = Tools::linspace(1., last_year, num_swap);
   for (auto& ttm : ttms) {
     auto swap_rate = 0.04 + 0.02 * ttm / 30;
@@ -29,6 +29,23 @@ std::vector<std::shared_ptr<IR::Instrument::IRSwap>> MakeSwaps(
     output.push_back(swap);
   }
   return output;
+}
+
+std::shared_ptr<IR::TermStructure> MakeDiscCurve(
+    bool is_libor_curve = true) {
+  auto num_steps = 200;
+  auto last_year = 50.;
+  auto ttms = Tools::linspace(0.25, last_year, num_steps);
+  std::vector<IR::ZeroRate> zero_rates;
+  zero_rates.reserve(ttms.size());
+  for (const auto& ttm : ttms) {
+    auto zero_rate = 0.04 + 0.02 * ttm / 30;
+    if (!is_libor_curve) {
+      zero_rate -= 0.01;
+    }
+    zero_rates.push_back(zero_rate);
+  }
+  return std::make_shared<IR::TermStructureZeroSimple>(ttms, zero_rates);
 }
 }  // namespace
 
@@ -52,6 +69,7 @@ void TestCase1() {
     cout << "TTM: " << libor_swap->GetTTM() << ", NPV: " << npv << endl;
     npvs.push_back(npv);
   }
+  cout << endl;
 }
 
 // Test Case 2: Test term structures can reprice all libor swaps to par.
@@ -59,14 +77,11 @@ void TestCase1() {
 void TestCase2() {
   using namespace IR;
   using namespace std;
-  auto ois_swaps = MakeSwaps(false);
   auto libor_swaps = MakeSwaps(true);
   double zero_rate_3m = 0.02;
   Pricer::IRSwapPricer pricer;
 
-  Bootstrap::BootstrapperSameCurve bootstrapper_same_curve(ois_swaps,
-                                                           zero_rate_3m);
-  auto ois_term_structure = bootstrapper_same_curve.Bootstrap();
+  auto ois_term_structure = MakeDiscCurve(false);
 
   Bootstrap::BootstrapperDiffCurve bootstrapper_diff_curve(
       libor_swaps, zero_rate_3m, ois_term_structure);
@@ -79,15 +94,29 @@ void TestCase2() {
     cout << "TTM: " << libor_swap->GetTTM() << ", NPV: " << npv << endl;
     npvs.push_back(npv);
   }
+  cout << endl;
 }
 
 // Test Case 3: Test DV01 and Convexity
 void TestCase3() {
-  std::cout << "Test Case 3" << std::endl;
+  using namespace std;
   using namespace IR;
+  std::cout << "Test Case 3" << std::endl;
   double h = 0.0001;  // 1 basis point step size
   Greek::DV01 dv01(h);
   Greek::Convexity convexity(h);
+  auto ttms = Tools::linspace(0.5, 3., 6);
+  std::vector<double> zero_rates{0.02,     0.024024, 0.027669,
+                                 0.030974, 0.033975, 0.036701};
+  auto term_structure = std::make_shared<IR::TermStructureZeroSimple>(
+      ttms, zero_rates, IR::Frequency::SemiAnnually);
+  auto pricer = std::make_shared<Pricer::IRSwapPricer>();
+  auto swap = std::make_shared<Instrument::IRSwap>(100, 0.05, 1, Frequency::Quarterly, Frequency::SemiAnnually, false);
+  auto dv01_value = dv01.Compute(pricer, swap, term_structure, term_structure);
+  auto convexity_value = convexity.Compute(pricer, swap, term_structure, term_structure);
+  cout << "DV01: " << dv01_value << endl;
+  cout << "Convexity: " << convexity_value << endl;
+  cout << endl;
 }
 
 // Test Case 4: Test Term Structure is working properly
@@ -99,7 +128,7 @@ void TestCase4() {
                                  0.030974, 0.033975, 0.036701};
   IR::TermStructureZeroSimple term_structure(ttms, zero_rates,
                                              IR::Frequency::SemiAnnually);
-  auto ttms_out = Tools::linspace(0.5, 3., 11);
+  auto ttms_out = Tools::linspace(0.5, 2.75, 11);
   for (auto& ttm : ttms_out) {
     std::cout << "TTM:" << ttm << std::endl;
     std::cout << "ZERO: " << term_structure.GetZero(ttm) << std::endl;

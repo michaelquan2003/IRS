@@ -51,17 +51,50 @@ std::shared_ptr<TermStructure> BootstrapperSameCurve::Bootstrap() {
     auto disc = (disc_minus_1 + price_minus_1 / notional) / denominator;
     auto zero_rate = term_structure->GetZeroFromDisc(disc, ttm);
     term_structure->AddRate(std::make_pair(ttm, zero_rate));
+    auto npv = pricer.NPV(swap, term_structure, term_structure);
     ttm += float_step;
   }
   return term_structure;
 }
 
 std::shared_ptr<TermStructure> BootstrapperDiffCurve::Bootstrap() {
-  std::vector<double> ttms{0.25};
+  auto notional = instrs_.begin()->second->GetNotional();
+  auto float_freq = instrs_.begin()->second->GetFloatFrequency();
+  auto fixed_freq = instrs_.begin()->second->GetFixedFrequency();
+  auto float_step = Tools::GetStepPerYear(float_freq);
+  auto fixed_step = Tools::GetStepPerYear(fixed_freq);
+  auto ttm_start = 0.25;
+  auto ttm = ttm_start + float_step;
+  std::vector<double> ttms{ttm_start};
   std::vector<double> zero_rates{zero_rate_3m_};
-  auto float_freq = instrs_[0]->GetFloatFrequency();
-  IR::TermStructureZeroSimple term_structure(ttms, zero_rates, float_freq);
-  return nullptr;
+
+  auto project_curve =
+      std::make_shared<TermStructureZeroSimple>(ttms, zero_rates, float_freq);
+  Pricer::IRSwapPricer pricer;
+  auto last_ttm = std::prev(instrs_.end())->first;
+  while (ttm <= last_ttm) {
+    auto swap_rate = (*swap_rates_interpolator_)(ttm);
+    auto ttm_minus_1 = ttm - float_step;
+    auto swap_minus_1 =
+        std::make_shared<Instrument::IRSwap>(notional, swap_rate, ttm_minus_1);
+    auto swap = std::make_shared<Instrument::IRSwap>(notional, swap_rate, ttm);
+    auto fixed_schedule = swap->GetFixedSchedule();
+    auto price_minus_1 =
+        pricer.NPV(swap_minus_1, project_curve, discount_curve_);
+    auto disc = discount_curve_->GetDiscountFactor(ttm);
+    auto nominator = -price_minus_1 / notional;
+    nominator += Tools::is_equal(fixed_schedule.back(), ttm)
+                     ? swap_rate * fixed_step * disc
+                     : 0.;
+    auto denominator = float_step * disc;
+    auto foward_rate = nominator / denominator;
+    auto zero_rate =
+        project_curve->GetZeroFromForward(foward_rate, ttm_minus_1, ttm);
+    project_curve->AddRate(std::make_pair(ttm, zero_rate));
+    auto npv = pricer.NPV(swap, project_curve, discount_curve_);
+    ttm += float_step;
+  }
+  return project_curve;
 }
 
 }  // namespace Bootstrap
